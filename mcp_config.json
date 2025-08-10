@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "hello-world": {
+      "command": "/User/bigmac/Code/Go/structs/main",
+      "args": [],
+      "env": {}
+    }
+  }
+}

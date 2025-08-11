@@ -5,33 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"mcp-server-hello-world/cmd/subsystems/mcp"
 )
 
 type (
-	//Generic struct {
-	//	Tool Tool
-	//	Type string
-	//	Name string
-	//}
-
-	McpRequest struct {
-		JsonRpc string      `json:"jsonrpc"`
-		Id      interface{} `json:"id"`
-		Method  string      `json:"method"`
-		Params  interface{} `json:"params,omitempty"`
-	}
-	McpResponse struct {
-		JsonRpc string      `json:"jsonrpc"`
-		Id      interface{} `json:"id"`
-		Result  interface{} `json:"result,omitempty"`
-		Error   *McpError   `json:"error,omitempty"`
-	}
-
-	McpError struct {
-		Code    int    `json:"code"`
-		Message string `json:"message"`
-	}
-
 	InitializeParams struct {
 		ProtocolVersion string                 `json:"protocolVersion"`
 		Capabilities    map[string]interface{} `json:"capabilities"`
@@ -113,7 +91,7 @@ func main() {
 		}
 		fmt.Fprintf(os.Stderr, "Received: %s\n", line)
 
-		var request McpRequest
+		var request mcp.McpRequest
 		if err := json.Unmarshal([]byte(line), &request); err != nil {
 			fmt.Fprintf(os.Stderr, "Parse error: %v\n", err)
 			sendError(request.Id, -32700, "Parse error")
@@ -128,7 +106,7 @@ func main() {
 	}
 }
 
-func handleRequest(req McpRequest) {
+func handleRequest(req mcp.McpRequest) {
 	fmt.Fprintf(os.Stderr, "Processing method: %s with ID: %v\n", req.Method, req.Id)
 
 	switch req.Method {
@@ -147,7 +125,7 @@ func handleRequest(req McpRequest) {
 	}
 }
 
-func handleInitialize(req McpRequest) {
+func handleInitialize(req mcp.McpRequest) {
 	// Parse the initialize parameters
 	paramsBytes, err := json.Marshal(req.Params)
 	if err != nil {
@@ -181,7 +159,7 @@ func handleInitialize(req McpRequest) {
 	sendResponse(req.Id, result)
 }
 
-func handleListTools(req McpRequest) {
+func handleListTools(req mcp.McpRequest) {
 	tools := []Tool{
 		{
 			Name:        "hello_world",
@@ -205,7 +183,7 @@ func handleListTools(req McpRequest) {
 	sendResponse(req.Id, result)
 }
 
-func handleCallTool(req McpRequest) {
+func handleCallTool(req mcp.McpRequest) {
 	paramsBytes, err := json.Marshal(req.Params)
 	if err != nil {
 		sendError(req.Id, -32602, "Invalid params")
@@ -243,7 +221,7 @@ func handleCallTool(req McpRequest) {
 }
 
 func sendResponse(id interface{}, result interface{}) {
-	response := McpResponse{
+	response := mcp.McpResponse{
 		JsonRpc: "2.0",
 		Id:      id,
 		Result:  result,
@@ -254,10 +232,10 @@ func sendResponse(id interface{}, result interface{}) {
 }
 
 func sendError(id interface{}, code int, message string) {
-	response := McpResponse{
+	response := mcp.McpResponse{
 		JsonRpc: "2.0",
 		Id:      id,
-		Error: &McpError{
+		Error: &mcp.McpError{
 			Code:    code,
 			Message: message,
 		},

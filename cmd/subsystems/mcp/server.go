@@ -1,5 +1,7 @@
 package mcp
 
+import "fmt"
+
 type (
 	McpRequest struct {
 		JsonRpc string      `json:"jsonrpc"`
@@ -24,4 +26,21 @@ type (
 	}
 
 	Water struct{}
+
+	Appliance interface {
+		Make(string) Water
+	}
+
+	Oven struct {
+		temperature int
+	}
 )
+
+func (w *Water) doSomething() Water {
+	return Water{}
+}
+
+func (o *Oven) Make(sm string) Water {
+	fmt.Printf("Making %s", sm)
+	return Water{}
+}
